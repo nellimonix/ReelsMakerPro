@@ -35,7 +35,7 @@ class UploaderWidget(QWidget):
         
         # Add account button
         self.add_account_btn = QPushButton('Добавить аккаунт')
-        self.add_account_btn.setIcon(qta.icon('fa5s.plus-circle'))
+        self.add_account_btn.setIcon(qta.icon('fa5s.plus-circle', color='white', color_active='white'))
         self.add_account_btn.clicked.connect(self._add_account_handler)
         
         top_bar_layout.addWidget(self.add_account_btn)
@@ -127,7 +127,7 @@ class UploaderWidget(QWidget):
         )
         
         # Create icon for tab
-        icon = qta.icon('fa5s.user-circle')
+        icon = qta.icon('fa5s.user-circle', color='white', color_active='white')
         
         # Add tab to tab widget
         index = self.tabs.addTab(tab_widget, icon, f' {account_name} ')
