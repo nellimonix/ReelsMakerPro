@@ -637,7 +637,8 @@ class ProcessingWidgetContent(QWidget):
         
         # Watermark label
         self.watermark_label = QLabel()
-        self.watermark_label.setText('Больше программ в Telegram-канале: <a href="https://t.me/magerkopython">@magerkopython</a>')
+        self.watermark_label.setText('Декомпиляцию последней версии программы выполнил llimonix.<br>Мой Telegram канал: '
+        '<a href="https://t.me/findllimonix" style="color:#df4f44; text-decoration:none;">@findllimonix</a>')
         self.watermark_label.setTextFormat(Qt.RichText)
         self.watermark_label.setOpenExternalLinks(True)
         self.watermark_label.setAlignment(Qt.AlignCenter)
@@ -1041,7 +1042,7 @@ class SettingsWidget(QWidget):
         style_layout = QHBoxLayout(style_group)
         
         self.style_combo = QComboBox()
-        self.style_combo.addItems(['Dark', 'Light'])
+        self.style_combo.addItems(['Dark [mod by llimonix]', 'Light [mod by llimonix]', 'Dark [Original]', 'Light [Original]'])
         
         style_layout.addWidget(QLabel('Тема оформления:'))
         style_layout.addWidget(self.style_combo)
@@ -1102,17 +1103,17 @@ class VideoUnicApp(QMainWindow):
         self.button_group.setExclusive(True)
         
         # Кнопки меню
-        self.processing_btn = QPushButton(qta.icon('fa5s.cogs'), ' Обработка')
+        self.processing_btn = QPushButton(qta.icon('fa5s.cogs', color='white', color_active='white'), ' Обработка')
         self.processing_btn.setObjectName('menu_button')
         self.processing_btn.setCheckable(True)
         self.button_group.addButton(self.processing_btn)
         
-        self.upload_btn = QPushButton(qta.icon('fa5s.upload'), ' Загрузка на YouTube')
+        self.upload_btn = QPushButton(qta.icon('fa5s.upload', color='white', color_active='white'), ' Загрузка на YouTube')
         self.upload_btn.setObjectName('menu_button')
         self.upload_btn.setCheckable(True)
         self.button_group.addButton(self.upload_btn)
         
-        self.settings_btn = QPushButton(qta.icon('fa5s.sliders-h'), ' Настройки')
+        self.settings_btn = QPushButton(qta.icon('fa5s.sliders-h', color='white', color_active='white'), ' Настройки')
         self.settings_btn.setObjectName('menu_button')
         self.settings_btn.setCheckable(True)
         self.button_group.addButton(self.settings_btn)
@@ -1124,7 +1125,7 @@ class VideoUnicApp(QMainWindow):
         self.left_menu_layout.addStretch()
         
         # Кнопка выхода
-        self.exit_btn = QPushButton(qta.icon('fa5s.sign-out-alt'), ' Выход')
+        self.exit_btn = QPushButton(qta.icon('fa5s.sign-out-alt', color='white', color_active='white'), ' Выход')
         self.exit_btn.setObjectName('menu_button')
         self.left_menu_layout.addWidget(self.exit_btn)
         
@@ -1160,19 +1161,44 @@ class VideoUnicApp(QMainWindow):
         
         # Установка начального состояния
         self.processing_btn.setChecked(True)
-        self.apply_stylesheet('Dark')
+        self.apply_stylesheet('Dark [mod by llimonix]')
         
         # Подключение сигнала обработки видео
         self.processing_widget.video_processed.connect(self.prepare_for_upload)
     
     def apply_stylesheet(self, mode):
-        style_filename = 'styles_dark.qss' if mode.lower() == 'dark' else 'styles_light.qss'
+        mode = mode.lower()
+        if mode == 'dark [mod by llimonix]':
+            style_filename = 'styles_dark.qss'
+        elif mode == 'light [mod by llimonix]':
+            style_filename = 'styles_light.qss'
+        elif mode == 'dark [original]':
+            style_filename = 'original_dark.qss'
+        elif mode == 'light [original]':
+            style_filename = 'original_light.qss'
+        else:
+            style_filename = 'styles_dark.qss'
+
         path = resource_path(os.path.join('resources', style_filename))
         
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 style = f.read()
                 self.setStyleSheet(style)
+                if 'light' in style_filename:
+                    icon_color = 'black'
+                else:
+                    icon_color = 'white'
+                
+                self.processing_btn.setIcon(qta.icon('fa5s.cogs', color=icon_color, color_active='white'))
+                self.upload_btn.setIcon(qta.icon('fa5s.upload', color=icon_color, color_active='white'))
+                self.settings_btn.setIcon(qta.icon('fa5s.sliders-h', color=icon_color, color_active='white'))
+                self.exit_btn.setIcon(qta.icon('fa5s.sign-out-alt', color=icon_color, color_active='white'))
+                self.uploader_widget.add_account_btn.setIcon(qta.icon('fa5s.user-plus', color=icon_color, color_active='white'))
+                for i in range(self.uploader_widget.tabs.count()):
+                    icon = qta.icon('fa5s.user-circle', color=icon_color, color_active='white')
+                    self.uploader_widget.tabs.setTabIcon(i, icon)
+
         except FileNotFoundError:
             print(f'Stylesheet not found at {path}')
             self.setStyleSheet('')
