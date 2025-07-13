@@ -1,5 +1,5 @@
 
-# ReelsMaker Pro
+# ReelsMakerPro [mod by llimonix]
 
 ![Превью приложения](resources/banner.png)
 
