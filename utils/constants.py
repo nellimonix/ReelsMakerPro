@@ -1,4 +1,4 @@
-APP_NAME = "ReelsMaker Pro"
+APP_NAME = "ReelsMaker Pro [mod by llimonix]"
 APP_VERSION = "1.1.0"
 LOG_FILE = "app.log"
 FFMPEG_EXE_PATH = "C:/ffmpeg/bin/ffmpeg.exe"
