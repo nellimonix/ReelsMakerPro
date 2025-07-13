@@ -34,8 +34,6 @@ def download_video(url: str, out_path: str) -> bool:
         yt_dlp_exe_path,
         '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',  # Формат видео
         '--merge-output-format', 'mp4',  # Объединить в MP4
-        '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 YaBrowser/25.6.0.0 Safari/537.36',  # User-Agent
-        '--force-ipv4',  # (опционально) форс IPv4
         '-o', out_path,  # Выходной файл
         url  # URL для скачивания
     ]
