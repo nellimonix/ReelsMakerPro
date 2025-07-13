@@ -85,8 +85,29 @@ class AccountTabWidget(QWidget):
         
         # Настройки приватности
         self.privacy_combo = QComboBox()
-        self.privacy_combo.addItems(['private', 'unlisted', 'public'])
+        self.privacy_combo.addItem('Приватное', 'private')
+        self.privacy_combo.addItem('Доступ по ссылке', 'unlisted')
+        self.privacy_combo.addItem('Публичное', 'public')
         form_layout.addRow('Приватность:', self.privacy_combo)
+
+        # Настройки категории
+        self.category_combo = QComboBox()
+        self.category_combo.addItem('Фильмы и анимация', '1')
+        self.category_combo.addItem('Транспорт', '2')
+        self.category_combo.addItem('Музыка', '10')
+        self.category_combo.addItem('Хобби и стиль', '26')
+        self.category_combo.addItem('Животные', '15')
+        self.category_combo.addItem('Спорт', '17')
+        self.category_combo.addItem('Игры', '20')
+        self.category_combo.addItem('Люди и блоги', '22')
+        self.category_combo.addItem('Юмор', '23')
+        self.category_combo.addItem('Развлечения', '24')
+        self.category_combo.addItem('Новости и политика', '25')
+        self.category_combo.addItem('Образование', '27')
+        self.category_combo.addItem('Наука и техника', '28')
+        self.category_combo.addItem('Общественная деятельность', '29')
+        self.category_combo.addItem('Путешествия', '19')
+        form_layout.addRow('Категория:', self.category_combo)
         
         # Настройки планирования публикации
         self.publish_at_checkbox = QCheckBox('Опубликовать в определенное время')
@@ -303,7 +324,8 @@ class AccountTabWidget(QWidget):
             title=title,
             description=description,
             tags=self.tags_edit.text().split(','),
-            privacy_status=self.privacy_combo.currentText(),
+            privacy_status=self.privacy_combo.currentData(),
+            category=self.category_combo.currentData(),
             publish_at=(
                 self.publish_at_datetime.dateTime().toPyDateTime().isoformat() + 'Z'
                 if self.publish_at_checkbox.isChecked()
