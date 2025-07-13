@@ -9,7 +9,7 @@ class YouTubeWorkerSignals(QObject):
     error = pyqtSignal(str)      # Signal emitted when an error occurs
 
 class YouTubeWorker(QRunnable):
-    def __init__(self, credentials, video_path, title, description, tags, privacy_status, publish_at):
+    def __init__(self, credentials, video_path, title, description, tags, privacy_status, category, publish_at):
         super().__init__()
         self.credentials = credentials
         self.video_path = video_path
@@ -17,6 +17,7 @@ class YouTubeWorker(QRunnable):
         self.description = description
         self.tags = tags
         self.privacy_status = privacy_status
+        self.category = category
         self.publish_at = publish_at
         self.signals = YouTubeWorkerSignals()  # Create an instance of the signals class
 
@@ -31,7 +32,7 @@ class YouTubeWorker(QRunnable):
                     'title': self.title,
                     'description': self.description,
                     'tags': self.tags,
-                    'categoryId': '22'  # Default category ID
+                    'categoryId': self.category
                 },
                 'status': {
                     'privacyStatus': self.privacy_status
