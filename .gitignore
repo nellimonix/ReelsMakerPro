@@ -1,6 +1,45 @@
-\.venv
-\__pycache__
-\config
-\bin
-\ffmpeg
-crash_log.log
+# Виртуальная среда Python
+.venv/
+venv/
+env/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Конфигурационные файлы
+config/
+.env
+.env.local
+
+# Бинарные файлы и внешние утилиты
+bin/
+ffmpeg/
+*.exe
+
+# Логи
+*.log
+
+# IDE и редакторы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Операционная система
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Сборка и дистрибутив
+build/
+dist/
+*.egg-info/
