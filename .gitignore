@@ -1,3 +1,6 @@
 \.venv
 \__pycache__
 \config
+\bin
+\ffmpeg
+crash_log.log
