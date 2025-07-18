@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
 )
 
 import qtawesome as qta
+from uploader_core.config_manager import ConfigManager
 from workers.worker import Worker
 from utils.file_utils import is_video_file, find_videos_in_folder
 from utils.constants import (
@@ -1042,7 +1043,10 @@ class SettingsWidget(QWidget):
         style_layout = QHBoxLayout(style_group)
         
         self.style_combo = QComboBox()
-        self.style_combo.addItems(['Dark [mod by llimonix]', 'Light [mod by llimonix]', 'Dark [Original]', 'Light [Original]'])
+        self.style_combo.addItem('Dark [mod by llimonix]', 'styles_dark')
+        self.style_combo.addItem('Light [mod by llimonix]', 'styles_light')
+        self.style_combo.addItem('Dark [Original]', 'original_dark')
+        self.style_combo.addItem('Light [Original]', 'original_light')
         
         style_layout.addWidget(QLabel('Тема оформления:'))
         style_layout.addWidget(self.style_combo)
@@ -1067,6 +1071,7 @@ class VideoUnicApp(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        self.config_manager = ConfigManager()
         self.temp_dir = tempfile.mkdtemp(prefix='reels_maker_')
         self.temp_files = []
         self.init_ui()
@@ -1157,38 +1162,38 @@ class VideoUnicApp(QMainWindow):
         self.exit_btn.clicked.connect(self.close)
         
         # Настройки темы
-        self.settings_widget.style_combo.currentTextChanged.connect(self.apply_stylesheet)
+        self.settings_widget.style_combo.currentIndexChanged[int].connect(self.on_style_changed)
         
         # Установка начального состояния
         self.processing_btn.setChecked(True)
-        self.apply_stylesheet('Dark [mod by llimonix]')
+        # Установка начального стиля
+        style_default = self.config_manager.get_setting('style', 'styles_dark')
+        self.apply_stylesheet(style_default)
+
+        # Установка стиля в комбобоксе
+        self.settings_widget.style_combo.setCurrentIndex(self.settings_widget.style_combo.findData(style_default))
         
         # Подключение сигнала обработки видео
         self.processing_widget.video_processed.connect(self.prepare_for_upload)
-    
-    def apply_stylesheet(self, mode):
-        mode = mode.lower()
-        if mode == 'dark [mod by llimonix]':
-            style_filename = 'styles_dark.qss'
-        elif mode == 'light [mod by llimonix]':
-            style_filename = 'styles_light.qss'
-        elif mode == 'dark [original]':
-            style_filename = 'original_dark.qss'
-        elif mode == 'light [original]':
-            style_filename = 'original_light.qss'
-        else:
-            style_filename = 'styles_dark.qss'
 
+    def on_style_changed(self, index):
+        # Получение выбранного стиля
+        style_key = self.settings_widget.style_combo.itemData(index)
+        # Сохранение выбранного стиля в конфигурации
+        self.config_manager.set_setting('style', style_key)
+        # Применение стиля
+        self.apply_stylesheet(style_key)
+
+    def apply_stylesheet(self, mode):
+        style_filename = f'{mode}.qss'
         path = resource_path(os.path.join('resources', style_filename))
         
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 style = f.read()
                 self.setStyleSheet(style)
-                if 'light' in style_filename:
-                    icon_color = 'black'
-                else:
-                    icon_color = 'white'
+
+                icon_color = 'black' if 'light' in style_filename else 'white'
                 
                 self.processing_btn.setIcon(qta.icon('fa5s.cogs', color=icon_color, color_active='white'))
                 self.upload_btn.setIcon(qta.icon('fa5s.upload', color=icon_color, color_active='white'))
