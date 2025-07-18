@@ -6,6 +6,8 @@ from PyQt5.QtGui import QIcon
 import logging
 
 from os.path import dirname, abspath
+
+from utils.path_utils import get_ffmpeg_path
 project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
@@ -45,7 +47,9 @@ def main():
     myappid = f"mycompany.{APP_NAME}.{APP_VERSION}"
     set_app_user_model_id(myappid)
 
-    if sys.platform.startswith("win") and not os.path.exists(FFMPEG_EXE_PATH):
+    ffpmeg_path = get_ffmpeg_path()
+
+    if sys.platform.startswith("win") and not os.path.exists(ffpmeg_path):
         logging.error(f"Error: ffmpeg.exe not found at {FFMPEG_EXE_PATH}")
         logging.error("Please ensure FFmpeg is in the specified path or in your system's PATH.")
 

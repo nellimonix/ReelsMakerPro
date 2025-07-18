@@ -25,7 +25,7 @@ try:
     )
 except ImportError:
     # Fallback значения если модуль constants недоступен
-    FFMPEG_EXE_PATH = "ffmpeg.exe"
+    FFMPEG_EXE_PATH = "bin/ffmpeg.exe"
     FILTERS = {}
     OVERLAY_POSITIONS = {}
     REELS_WIDTH = 1080

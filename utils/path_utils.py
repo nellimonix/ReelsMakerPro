@@ -7,6 +7,8 @@ import shutil
 import sys
 import os
 
+from utils.constants import FFMPEG_EXE_PATH
+
 
 def resource_path(relative_path: str) -> str:
     """
@@ -37,7 +39,7 @@ def resource_path(relative_path: str) -> str:
 # Поиск FFPMEG где рядом с исполняемым файлом или в системном PATH
 
 def get_ffmpeg_path():
-    local_path = resource_path('ffmpeg.exe')
+    local_path = resource_path(FFMPEG_EXE_PATH)
     if os.path.isfile(local_path):
         return local_path
     

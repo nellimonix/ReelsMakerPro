@@ -1,7 +1,7 @@
 APP_NAME = "ReelsMaker Pro [mod by llimonix]"
 APP_VERSION = "1.1.1"
 LOG_FILE = "app.log"
-FFMPEG_EXE_PATH = "C:/ffmpeg/bin/ffmpeg.exe"
+FFMPEG_EXE_PATH = "bin/ffmpeg.exe"
 
 VIDEO_EXTENSIONS = [
     ".mp4", ".mov", ".avi", ".mkv", ".flv", ".wmv"
