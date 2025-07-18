@@ -34,7 +34,7 @@ class AuthManager:
         return os.path.join(self.credentials_dir, f'{account_name}.pickle')
     
     def authenticate(self, account_name, client_secrets_file, 
-                    scopes=['https://www.googleapis.com/auth/youtube.upload']):
+                    scopes=['https://www.googleapis.com/auth/youtube']):
         """Аутентификация аккаунта YouTube"""
         creds = None
         credential_path = self._get_credential_path(account_name)
