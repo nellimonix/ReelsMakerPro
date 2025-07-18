@@ -7,7 +7,7 @@ import shutil
 import sys
 import os
 
-from utils.constants import FFMPEG_EXE_PATH
+from utils.constants import FFMPEG_EXE_PATH, YTDLP_EXE_PATH
 
 
 def resource_path(relative_path: str) -> str:
@@ -53,7 +53,7 @@ def get_ffmpeg_path():
 # Поиск YT_DLP где рядом с исполняемым файлом или в системном PATH
 
 def get_ytdlp_path():
-    local_path = resource_path('yt-dlp.exe')
+    local_path = resource_path(YTDLP_EXE_PATH)
     if os.path.isfile(local_path):
         return local_path
     
