@@ -4,7 +4,7 @@ import sys
 
 class ConfigManager:
     def __init__(self):
-        self.config_path = self._get_absolute_path('config/config.json')
+        self.config_path = self._get_absolute_path('config/config.json') 
         self.history_path = self._get_absolute_path('config/history.json')
         self.schedule_path = self._get_absolute_path('config/schedule.json')
 
@@ -15,10 +15,13 @@ class ConfigManager:
 
     def _get_absolute_path(self, relative_path):
         """Get the absolute path for a given relative path."""
-        if hasattr(sys, '_MEIPASS'):
-            base_path = sys._MEIPASS
+        if getattr(sys, 'frozen', False):
+            # Приложение запущено из PyInstaller bundle
+            base_path = os.path.dirname(sys.executable)
         else:
-            base_path = os.path.abspath('.')
+            # Приложение запущено из исходного кода
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
         return os.path.join(base_path, relative_path)
 
     def _load_json(self, file_path, default=None):
