@@ -20,7 +20,7 @@ class ConfigManager:
             base_path = os.path.dirname(sys.executable)
         else:
             # Приложение запущено из исходного кода
-            base_path = os.path.dirname(os.path.abspath(__file__))
+            base_path = os.path.abspath('.')
 
         return os.path.join(base_path, relative_path)
 
