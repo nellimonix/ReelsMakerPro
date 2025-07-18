@@ -2,13 +2,13 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLineEdit, QPushButton,
     QLabel, QFormLayout, QPlainTextEdit, QDateTimeEdit, QComboBox, QCheckBox,
     QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
-    QFileDialog, QMessageBox, QGroupBox
+    QFileDialog, QMessageBox, QGroupBox, QSizePolicy
 )
 from PyQt5.QtCore import QDateTime, QThreadPool
 import qtawesome as qta
 
 from uploader_core.ai_worker import AIWorker
-from uploader_core.youtube_worker import YouTubeWorker
+from uploader_core.youtube_worker import YouTubeWorker, PlaylistWorker
 
 
 class AccountTabWidget(QWidget):
@@ -91,23 +91,52 @@ class AccountTabWidget(QWidget):
         form_layout.addRow('Приватность:', self.privacy_combo)
 
         # Настройки категории
+        # Список категорий: (отображаемое имя, ID категории)
+        categories = [
+            ('Фильмы и анимация', '1'),
+            ('Транспорт', '2'),
+            ('Музыка', '10'),
+            ('Хобби и стиль', '26'),
+            ('Животные', '15'),
+            ('Спорт', '17'),
+            ('Игры', '20'),
+            ('Люди и блоги', '22'),
+            ('Юмор', '23'),
+            ('Развлечения', '24'),
+            ('Новости и политика', '25'),
+            ('Образование', '27'),
+            ('Наука и техника', '28'),
+            ('Общественная деятельность', '29'),
+            ('Путешествия', '19')
+        ]
+
+        # Создаём комбобокс и добавляем категории
         self.category_combo = QComboBox()
-        self.category_combo.addItem('Фильмы и анимация', '1')
-        self.category_combo.addItem('Транспорт', '2')
-        self.category_combo.addItem('Музыка', '10')
-        self.category_combo.addItem('Хобби и стиль', '26')
-        self.category_combo.addItem('Животные', '15')
-        self.category_combo.addItem('Спорт', '17')
-        self.category_combo.addItem('Игры', '20')
-        self.category_combo.addItem('Люди и блоги', '22')
-        self.category_combo.addItem('Юмор', '23')
-        self.category_combo.addItem('Развлечения', '24')
-        self.category_combo.addItem('Новости и политика', '25')
-        self.category_combo.addItem('Образование', '27')
-        self.category_combo.addItem('Наука и техника', '28')
-        self.category_combo.addItem('Общественная деятельность', '29')
-        self.category_combo.addItem('Путешествия', '19')
+        for name, category_id in categories:
+            self.category_combo.addItem(name, category_id)
+
         form_layout.addRow('Категория:', self.category_combo)
+
+        # Настройки плейлиста
+        self.playlist_combo = QComboBox()
+        self.playlist_combo.addItem('Не добавлять в плейлист', None)
+        
+        # Кнопка обновления списка плейлистов
+        self.refresh_playlists_btn = QPushButton('Обновить')
+        self.refresh_playlists_btn.clicked.connect(self._load_playlists)
+        self.refresh_playlists_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        
+        playlist_layout = QHBoxLayout()
+        playlist_layout.addWidget(self.playlist_combo)
+        playlist_layout.addWidget(self.refresh_playlists_btn)
+        
+        form_layout.addRow('Плейлист:', playlist_layout)
+
+        # Настройки аудитории
+        self.made_for_kids_combo = QComboBox()
+        self.made_for_kids_combo.addItem('Нет, это видео не для детей', False)
+        self.made_for_kids_combo.addItem('Да, это видео для детей', True)
+        form_layout.addRow('Аудитория:', self.made_for_kids_combo)
         
         # Настройки планирования публикации
         self.publish_at_checkbox = QCheckBox('Опубликовать в определенное время')
@@ -121,7 +150,7 @@ class AccountTabWidget(QWidget):
         
         form_layout.addRow(self.publish_at_checkbox)
         form_layout.addRow(self.publish_at_datetime)
-        
+
         layout.addLayout(form_layout)
         
         # Группа AI генерации
@@ -177,9 +206,9 @@ class AccountTabWidget(QWidget):
         
         # Таблица истории
         self.history_table = QTableWidget()
-        self.history_table.setColumnCount(4)
+        self.history_table.setColumnCount(5)
         self.history_table.setHorizontalHeaderLabels([
-            'Дата', 'Видео', 'Заголовок', 'ID / Статус'
+            'Дата', 'Видео', 'Заголовок', 'ID / Статус', 'Плейлист'
         ])
         
         # Настройка таблицы
@@ -224,6 +253,10 @@ class AccountTabWidget(QWidget):
             self.history_table.setItem(
                 row_position, 3,
                 QTableWidgetItem(entry.get('video_id', 'N/A'))
+            )
+            self.history_table.setItem(
+                row_position, 4,
+                QTableWidgetItem(entry.get('playlist', 'Не добавлено'))
             )
         
         # Подгоняем размеры колонок
@@ -330,7 +363,9 @@ class AccountTabWidget(QWidget):
                 self.publish_at_datetime.dateTime().toPyDateTime().isoformat() + 'Z'
                 if self.publish_at_checkbox.isChecked()
                 else None
-            )
+            ),
+            playlist_id=self.playlist_combo.currentData(),
+            made_for_kids=self.made_for_kids_checkbox.currentData()
         )
         
         # Подключаем обработчики сигналов
@@ -349,20 +384,34 @@ class AccountTabWidget(QWidget):
         self.upload_btn.setEnabled(True)
         self.upload_btn.setText(' Загрузить видео')
         
+        # Формируем сообщение об успехе
+        message = f'Видео успешно загружено! ID: {video_id}'
+        
+        # Добавляем информацию о плейлисте, если видео было добавлено в плейлист
+        selected_playlist_id = self.playlist_combo.currentData()
+        if selected_playlist_id:
+            selected_playlist_text = self.playlist_combo.currentText()
+            message += f'\n\nВидео добавлено в плейлист: {selected_playlist_text}'
+        
         # Уведомляем пользователя
-        QMessageBox.information(
-            self, 'Успех',
-            f'Видео успешно загружено! ID: {video_id}'
-        )
+        QMessageBox.information(self, 'Успех', message)
         
         # Добавляем запись в историю
-        self.config_manager.add_history_entry({
+        history_entry = {
             'account': self.account_name,
             'video_id': video_id,
             'title': self.title_edit.text(),
             'path': self.video_path_edit.text(),
             'timestamp': QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
-        })
+        }
+        
+        # Добавляем информацию о плейлисте, если видео было добавлено в плейлист
+        selected_playlist_id = self.playlist_combo.currentData()
+        if selected_playlist_id:
+            selected_playlist_text = self.playlist_combo.currentText()
+            history_entry['playlist'] = selected_playlist_text
+        
+        self.config_manager.add_history_entry(history_entry)
         
         # Очищаем форму и обновляем историю
         self._clear_manual_upload_form()
@@ -385,3 +434,57 @@ class AccountTabWidget(QWidget):
         self.tags_edit.clear()
         self.privacy_combo.setCurrentIndex(0)
         self.publish_at_checkbox.setChecked(False)
+        self.made_for_kids_combo.setCurrentIndex(0)
+        self.playlist_combo.setCurrentIndex(0)
+    
+    def _load_playlists(self):
+        """Загрузка списка плейлистов пользователя"""
+        # Получаем учетные данные для аутентификации
+        credentials = self.auth_manager.get_credentials(self.account_name)
+        if not credentials:
+            QMessageBox.critical(
+                self, 'Ошибка',
+                'Не удалось получить данные для аутентификации.'
+            )
+            return
+        
+        # Отключаем кнопку обновления
+        self.refresh_playlists_btn.setEnabled(False)
+        self.refresh_playlists_btn.setText('Загрузка...')
+        
+        # Создаем и запускаем worker для загрузки плейлистов
+        worker = PlaylistWorker(credentials)
+        worker.signals.finished.connect(self._on_playlists_loaded)
+        worker.signals.error.connect(self._on_playlists_error)
+        
+        self.thread_pool.start(worker)
+    
+    def _on_playlists_loaded(self, playlists):
+        """Обработчик успешной загрузки плейлистов"""
+        # Восстанавливаем состояние кнопки
+        self.refresh_playlists_btn.setEnabled(True)
+        self.refresh_playlists_btn.setText('Обновить')
+        
+        # Очищаем комбобокс (кроме первого элемента)
+        while self.playlist_combo.count() > 1:
+            self.playlist_combo.removeItem(1)
+        
+        # Добавляем плейлисты в комбобокс
+        for playlist in playlists:
+            display_text = f"{playlist['title']} ({playlist['item_count']} видео)"
+            self.playlist_combo.addItem(display_text, playlist['id'])
+        
+        # Уведомляем пользователя
+        QMessageBox.information(
+            self, 'Плейлисты загружены',
+            f'Загружено {len(playlists)} плейлистов.'
+        )
+    
+    def _on_playlists_error(self, error):
+        """Обработчик ошибки загрузки плейлистов"""
+        # Восстанавливаем состояние кнопки
+        self.refresh_playlists_btn.setEnabled(True)
+        self.refresh_playlists_btn.setText('Обновить')
+        
+        # Показываем ошибку
+        QMessageBox.critical(self, 'Ошибка загрузки плейлистов', str(error))
