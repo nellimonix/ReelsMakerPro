@@ -43,3 +43,6 @@ tmp/
 build/
 dist/
 *.egg-info/
+
+# Дополнительные файлы
+models/
