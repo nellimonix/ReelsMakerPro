@@ -47,3 +47,4 @@ dist/
 
 # Дополнительные файлы
 models/
+build.txt
