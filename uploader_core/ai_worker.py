@@ -30,7 +30,7 @@ class AIWorker(QRunnable):
                 raise FileNotFoundError(f'Видеофайл не найден: {self.video_path}')
             
             # Загружаем модель Whisper для распознавания речи
-            model = whisper.load_model('base')
+            model = whisper.load_model('tiny')
             
             # Транскрибируем видео (извлекаем текст из речи)
             result = model.transcribe(self.video_path, fp16=False)
