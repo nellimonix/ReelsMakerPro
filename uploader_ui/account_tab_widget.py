@@ -365,7 +365,7 @@ class AccountTabWidget(QWidget):
                 else None
             ),
             playlist_id=self.playlist_combo.currentData(),
-            made_for_kids=self.made_for_kids_checkbox.currentData()
+            made_for_kids=self.made_for_kids_combo.currentData()
         )
         
         # Подключаем обработчики сигналов
